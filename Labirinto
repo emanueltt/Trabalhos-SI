@@ -1,0 +1,195 @@
+# Fundo preto
+# Paredes brancas
+# Exploracao azul
+# Caminho vermelho
+# Inicio Amarelo
+# Saida verde
+
+# Bibliotecas usadas
+#----------------------------------------------------------------------------------------------------------------#
+import turtle
+import time
+import sys
+from collections import deque
+
+# Configuracoes
+#----------------------------------------------------------------------------------------------------------------#
+mostrar_caminhos = 0                    # Mostrar todos os nodos explorados junto do caminho final
+metodo_busca = 1                        # Metodo de busca escolhido:
+                                        # 1 = Busca em largura
+                                        # 2 = Busca em profundidade
+                                        # 3 - Busca A*
+
+wn = turtle.Screen()                  
+wn.bgcolor("black")                     # Cor do fundo               
+wn.title("Resolve labirintos - SI")     # Nome da janela
+wn.setup(1600,900)                      # Dimensoes da janela
+
+grid = [
+"00000000000",
+"02000000000",
+"01000000000",
+"01000000000",
+"01111111100",
+"00001010100",
+"00011110100",
+"00010000100",
+"00010000100",
+"00013111100",
+"00000000000",
+]
+
+
+
+
+# Quadradinhos coloridos (turtle)
+#----------------------------------------------------------------------------------------------------------------#
+# Classe para o lab. (paredes)
+class Paredes(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")             # Muda o formato da tartaruga para um quadrado
+        self.color("white")              # Cor da tartaturga
+        self.penup()
+        self.speed(0)
+
+class Azul(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("blue")
+        self.penup()
+        self.speed(0)
+
+class Vermelho(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("red")
+        self.penup()
+        self.speed(0)
+
+class Amarelo(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("yellow")
+        self.penup()
+        self.speed(0)
+
+class Verde(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("green")
+        self.penup()
+        self.speed(0)
+
+class Preto(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("black")
+        self.penup()
+        self.speed(0)
+
+# Cria as classes para cada tipo de bloco
+parede_branca = Paredes()
+vermelho = Vermelho()
+azul = Azul()
+amarelo = Amarelo()
+verde = Verde()
+preto = Preto()
+
+
+
+# Gera o mapa com base na grid
+#----------------------------------------------------------------------------------------------------------------#
+def desenha_lab(grid):                           # Funcao pra desenhar o lab a partir da grid
+    global inicio_x, inicio_y, saida_x, saida_y  # Variaveis globais pro inicio e saida do lab
+    for y in range(len(grid)):                   # Le cada linha
+        for x in range(len(grid[y])):            # Le cada caractere da linha
+            character = grid[y][x]               # Pega o caractere da posicao atual
+            tela_x = -790 + (x * 24)             # Vai pra posicao "x" da tela, comecando em -588
+            tela_y = 430 - (y * 24)              # Vai pra posicao "y" da tela, comecando em 288
+
+            if character == "0":                           # Se o caractere atual for "0", ou seja, uma parede 
+                paredes.append((tela_x, tela_y))           # Adiciona as coordenadas na lista de paredes
+                parede_branca.goto(tela_x, tela_y)         # Posiciona a tartaruga branca na posicao
+                parede_branca.stamp()                      # Deixa uma copia da tartaruga ali
+               
+
+            if character == "1" or character == "3":  # No caso de um caminho valido (1) ou da saida (3)
+                caminhos.append((tela_x, tela_y))     # Adiciona a posicao na lista de caminhos
+                preto.goto(tela_x, tela_y)            # Manda a tartaruga preta pra posicao
+                preto.stamp()                         # Deixa uma copia da tartaruga ali  
+
+            if character == "3":                   # No caso de ser a saida (3)
+                saida_x, saida_y = tela_x, tela_y  # Marca as coordenadas nas variaveis globais da saida
+                verde.goto(tela_x, tela_y)         # Manda a tartaruga verde pra posicao
+                verde.stamp()                      # Deixa uma copia da tartaruga ali             
+
+            if character == "2":                     # No caso de ser o inicio do labirinto (2)
+                inicio_x, inicio_y = tela_x, tela_y  # Marca as coordenadas nas variaveis globais do inicio
+                amarelo.goto(tela_x, tela_y)         # Move a tartaruga vermelha pra posicao
+                amarelo.stamp()                      # Deixa uma copia dela ali
+
+
+# Metodo de busca em largura
+#----------------------------------------------------------------------------------------------------------------#
+def busca_largura(x,y):
+    proximos.append((x, y))
+    solucao[x,y] = x,y
+
+    while len(proximos) > 0:          # Sai caso n tenha mais nenhum node pra checar
+        time.sleep(0)
+        x, y = proximos.popleft()     # Coloca o proximo nodo e seta as posicoes x e y
+        E = (x - 24, y)               # Nodo esquerdo
+        I = (x, y - 24)               # Nodo infeior
+        S = (x, y + 24)               # Nodo superior
+        D = (x + 24, y)               # Nodo direito
+        direcoes = [E, I, S, D]
+        for j in direcoes:
+            if j in caminhos and j not in visitados:
+                nodo = j
+                solucao[nodo] = x, y      # Salva qual nodo originou o atual. [nodo] e o nodo antigo, e "x" e "y" e o nodo atal
+                proximos.append(nodo)     # Adiciona o nodo na fila de proximos
+                visitados.add(j)  # Adiciona o nodo na fila de visitados
+        if(x, y) != (inicio_x, inicio_y) and (x, y) != (saida_x, saida_y):
+            azul.goto(x,y)    # Coloca a tartaruga azul na posicao do nodo checado
+            azul.stamp()      # Deixa uma copia da tartaruga no local
+        if (x, y) == (saida_x, saida_y):    # Se o nodo for a saida, finaliza a busca
+            break
+
+
+# "Historico" dos nodos
+#----------------------------------------------------------------------------------------------------------------#
+def caminho_reverso(x, y):
+    verde.goto(x, y)
+    verde.stamp()
+    while (x, y) != (inicio_x, inicio_y):    # O loop continua ate chegar no inicio do labirinto
+        vermelho.goto(solucao[x, y])         # Coloca a tartaruga vermelha no nodo que chegar ao atual
+        vermelho.stamp()                     # Deixa uma copia da tartaruga
+        x, y = solucao[x, y]                 # O nodo que gerou o atual se torna o novo atual
+        if (x, y) == (inicio_x, inicio_y):   # Se o nodo for o inicio, deixa ele amarelo denovo
+            amarelo.goto(x, y)
+            amarelo.stamp()
+
+
+# Listas
+#----------------------------------------------------------------------------------------------------------------#
+paredes = []            # Guarda as posicoes que sao consideradas paredes (0)
+caminhos = []           # Guarda as posicoes que sao consideradas caminhos (1)
+visitados = set()       # Guarda as posicoes que ja foram verificadas e visitadas 
+proximos = deque()      # Guarda as posicoes que ja foram verificadas mas ainda nao visitadas
+solucao = {}            # Guarda as origens de cada nodo            
+
+
+# "main"
+#----------------------------------------------------------------------------------------------------------------#
+desenha_lab(grid)
+busca_largura(inicio_x,inicio_y)
+if mostrar_caminhos == 0:
+    desenha_lab(grid)
+caminho_reverso(saida_x, saida_y)
+wn.exitonclick()
