@@ -9,36 +9,100 @@
 #----------------------------------------------------------------------------------------------------------------#
 import turtle
 import time
-import sys
 from collections import deque
 
 # Configuracoes
 #----------------------------------------------------------------------------------------------------------------#
-mostrar_caminhos = 0                    # Mostrar todos os nodos explorados junto do caminho final
+mostrar_caminhos = 1                    # Mostrar todos os nodos explorados junto do caminho final
+                                        # Caso esteja desativado (0) o mapa final apresentara apenas o caminho encontrado ate a saida 
+                                        # Para a busca em largura: Os nodos azuis representam todos os nodos que foram explorados
+                                        #                          Os em vermelho represetam o melhor caminho ate a saida
+                                        # Para a busca em profundidade: Os nodos azuis representam o caminho ate a saida
+                                        #                               Os nodos vermelhos representam os caminhos que chegaram a um beco sem saida
+                                        #
 metodo_busca = 1                        # Metodo de busca escolhido:
                                         # 1 = Busca em largura
+                                        #     A ordem de ramificacao e < v ^ >
                                         # 2 = Busca em profundidade
-                                        # 3 - Busca A*
+                                        #     A ordem da busca em profundidade e a seguinte: < v > ^
+                                        # 3 - Busca A* - em construcao (?)
+                                        #
+tempo_de_espera = 0                     # Se quiser que a animacao demore um pouco para acontecer, basta colocar um valor em segundos na variavel ao lado
+                                        # Se quiser que n tenha intervalo, basta deixar em 0
+                                        # Uma velocidade que achamos confortavel para entender o rumo que os metodos estao tomando e 0.1
+                                        #
+mapa_desejado = 4                       # Abaixo das configuracoes de tela existem alguns mapas prontos (1 - 4)
+                                        # (A gente esqueceu que tinha que ser até 10x10, mas o cod aceita qualquer tamanho kk)
+                                        # O mapa 0 e o do exemplo dado
+                                        # O mapa 1 e um com varias ramificacoes 
+                                        # O mapa 3 e quadrado aberto, sem caminhos
+                                        # O mapa 4 e um pouco grande com varios caminhos
+
 
 wn = turtle.Screen()                  
 wn.bgcolor("black")                     # Cor do fundo               
 wn.title("Resolve labirintos - SI")     # Nome da janela
 wn.setup(1600,900)                      # Dimensoes da janela
 
-grid = [
-"00000000000",
-"02000000000",
-"01000000000",
-"01000000000",
-"01111111100",
-"00001010100",
-"00011110100",
-"00010000100",
-"00010000100",
-"00013111100",
-"00000000000",
-]
+if mapa_desejado == 1:
+    grid = [
+    "00000000000",
+    "02000000000",
+    "01000000000",
+    "01000000000",
+    "01111111100",
+    "00001010100",
+    "00011110100",
+    "00010000100",
+    "00010000100",
+    "00013111100",
+    "00000000000",
+    ]
 
+if mapa_desejado == 2:
+    grid = [
+    "000000000",
+    "010011120",
+    "010010000",
+    "010010000",
+    "011110000",
+    "010011110",
+    "010010000",
+    "010111300",
+    "000000000",
+    ]
+
+if mapa_desejado == 3:
+    grid = [
+    "000000000",
+    "011111110",
+    "011111110",
+    "011113110",
+    "011111110",
+    "011111110",
+    "011111110",
+    "021111110",
+    "000000000",
+    ]
+
+if mapa_desejado == 4:
+    grid = [
+    "00000000000000000000000000000000000000000",
+    "01111111111111111111111111111111111111110",
+    "01001000001000000001000000000000000000010",
+    "01001000001000000001000000011111111111010",
+    "01001000001111111001000111111111111100010",
+    "01000000000000000000000100000000000000010",
+    "01111111111111111100000111111111111111120",
+    "01000000000000000100000010000000000000000",
+    "01111111100000000100011110011111111111110",
+    "01001000100011111111110010010000000000010",
+    "01001000100000000100010010010011111111110",
+    "01000011111000000100011110010010100013010",
+    "01000010001000000100000000010010000000010",
+    "01111110001000000111111111110011111111110",
+    "00000000000000000000000000000000000000000",
+    ]
 
 
 
@@ -137,30 +201,53 @@ def desenha_lab(grid):                           # Funcao pra desenhar o lab a p
 
 # Metodo de busca em largura
 #----------------------------------------------------------------------------------------------------------------#
-def busca_largura(x,y):
+def busca_largura(x, y):
     proximos.append((x, y))
-    solucao[x,y] = x,y
+    solucao[x, y] = x, y
 
     while len(proximos) > 0:          # Sai caso n tenha mais nenhum node pra checar
-        time.sleep(0)
+        time.sleep(tempo_de_espera)
         x, y = proximos.popleft()     # Coloca o proximo nodo e seta as posicoes x e y
-        E = (x - 24, y)               # Nodo esquerdo
-        I = (x, y - 24)               # Nodo infeior
-        S = (x, y + 24)               # Nodo superior
-        D = (x + 24, y)               # Nodo direito
-        direcoes = [E, I, S, D]
-        for j in direcoes:
+        for j in [(x - 24, y), (x, y - 24), (x, y + 24), (x + 24, y)]:         # Verifica todas as direcoes
             if j in caminhos and j not in visitados:
-                nodo = j
-                solucao[nodo] = x, y      # Salva qual nodo originou o atual. [nodo] e o nodo antigo, e "x" e "y" e o nodo atal
-                proximos.append(nodo)     # Adiciona o nodo na fila de proximos
-                visitados.add(j)  # Adiciona o nodo na fila de visitados
+                solucao[j] = x, y      # Salva qual nodo originou o atual. [nodo] e o nodo antigo, e "x" e "y" e o nodo atal
+                proximos.append(j)     # Adiciona o nodo na fila de proximos
+                visitados.add(j)          # Adiciona o nodo na fila de visitados
         if(x, y) != (inicio_x, inicio_y) and (x, y) != (saida_x, saida_y):
             azul.goto(x,y)    # Coloca a tartaruga azul na posicao do nodo checado
             azul.stamp()      # Deixa uma copia da tartaruga no local
-        if (x, y) == (saida_x, saida_y):    # Se o nodo for a saida, finaliza a busca
+        if (x, y) == (saida_x, saida_y):   # Se o nodo for a saida, finaliza a busca
             break
 
+
+def busca_profundidade(x, y):
+    time.sleep(tempo_de_espera)
+    if x == saida_x and y == saida_y:   # Caso a posicao atual seja a saida: retorna 1 e encerra a recursao
+        return 1
+    if (x, y) in paredes or (x, y) in visitados:    
+        return 0
+    else:                           
+        visitados.add((x, y))   # Adiciona a posicao atual pra fila de visitadas
+        if(x, y) != (inicio_x, inicio_y):
+            azul.goto(x, y)         # Move a tartaruga azul para a posicao
+            azul.stamp()            # Deixa uma copia da tartaruga no local
+    if(busca_profundidade(x - 24, y)):
+        solucao[(x - 24, y)] = x, y
+        return 1
+    elif(busca_profundidade(x, y - 24)):
+        solucao[(x, y - 24)] = x, y
+        return 1
+    elif(busca_profundidade(x + 24, y)):
+        solucao[(x + 24, y)] = x, y
+        return 1
+    elif(busca_profundidade(x, y + 24)):
+        solucao[(x, y + 24)] = x, y
+        return 1
+    else:                       # Se nenhum nodo retornar 1: chegamos a um beco sem saida
+        time.sleep(tempo_de_espera)
+        vermelho.goto(x, y)     # Marca o caminho ate o beco sem saidas em vermelho
+        vermelho.stamp()
+    return 0
 
 # "Historico" dos nodos
 #----------------------------------------------------------------------------------------------------------------#
@@ -168,8 +255,12 @@ def caminho_reverso(x, y):
     verde.goto(x, y)
     verde.stamp()
     while (x, y) != (inicio_x, inicio_y):    # O loop continua ate chegar no inicio do labirinto
-        vermelho.goto(solucao[x, y])         # Coloca a tartaruga vermelha no nodo que chegar ao atual
-        vermelho.stamp()                     # Deixa uma copia da tartaruga
+        if metodo_busca == 1 or metodo_busca == 3:
+            vermelho.goto(solucao[x, y])     # Coloca a tartaruga vermelha no nodo que chegar ao atual
+            vermelho.stamp()                 # Deixa uma copia da tartaruga
+        if metodo_busca == 2:
+            azul.goto(solucao[x, y])     # Coloca a tartaruga vermelha no nodo que chegar ao atual
+            azul.stamp()                 # Deixa uma copia da tartaruga
         x, y = solucao[x, y]                 # O nodo que gerou o atual se torna o novo atual
         if (x, y) == (inicio_x, inicio_y):   # Se o nodo for o inicio, deixa ele amarelo denovo
             amarelo.goto(x, y)
@@ -188,8 +279,17 @@ solucao = {}            # Guarda as origens de cada nodo
 # "main"
 #----------------------------------------------------------------------------------------------------------------#
 desenha_lab(grid)
-busca_largura(inicio_x,inicio_y)
-if mostrar_caminhos == 0:
-    desenha_lab(grid)
-caminho_reverso(saida_x, saida_y)
+
+
+if metodo_busca == 1:
+    busca_largura(inicio_x,inicio_y)
+    if mostrar_caminhos == 0:
+        desenha_lab(grid)
+    caminho_reverso(saida_x,saida_y)
+
+if metodo_busca == 2:
+    placeholder = busca_profundidade(inicio_x,inicio_y)
+    if mostrar_caminhos == 0:
+        desenha_lab(grid)
+        caminho_reverso(saida_x,saida_y)
 wn.exitonclick()
