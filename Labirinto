@@ -205,18 +205,18 @@ def busca_largura(x, y):
     proximos.append((x, y))
     solucao[x, y] = x, y
 
-    while len(proximos) > 0:          # Sai caso n tenha mais nenhum node pra checar
+    while len(proximos) > 0:                # Sai caso n tenha mais nenhum node pra checar
         time.sleep(tempo_de_espera)
-        x, y = proximos.popleft()     # Coloca o proximo nodo e seta as posicoes x e y
+        x, y = proximos.popleft()           # Coloca o proximo nodo e seta as posicoes x e y
         for j in [(x - 24, y), (x, y - 24), (x, y + 24), (x + 24, y)]:         # Verifica todas as direcoes
             if j in caminhos and j not in visitados:
-                solucao[j] = x, y      # Salva qual nodo originou o atual. [nodo] e o nodo antigo, e "x" e "y" e o nodo atal
-                proximos.append(j)     # Adiciona o nodo na fila de proximos
-                visitados.add(j)          # Adiciona o nodo na fila de visitados
+                solucao[j] = x, y           # Salva qual nodo originou o atual. [nodo] e o nodo antigo, e "x" e "y" e o nodo atal
+                proximos.append(j)          # Adiciona o nodo na fila de proximos
+                visitados.add(j)            # Adiciona o nodo na fila de visitados
         if(x, y) != (inicio_x, inicio_y) and (x, y) != (saida_x, saida_y):
-            azul.goto(x,y)    # Coloca a tartaruga azul na posicao do nodo checado
-            azul.stamp()      # Deixa uma copia da tartaruga no local
-        if (x, y) == (saida_x, saida_y):   # Se o nodo for a saida, finaliza a busca
+            azul.goto(x,y)                  # Coloca a tartaruga azul na posicao do nodo checado
+            azul.stamp()                    # Deixa uma copia da tartaruga no local
+        if (x, y) == (saida_x, saida_y):    # Se o nodo for a saida, finaliza a busca
             break
 
 
@@ -227,11 +227,11 @@ def busca_profundidade(x, y):
     if (x, y) in paredes or (x, y) in visitados:    
         return 0
     else:                           
-        visitados.add((x, y))   # Adiciona a posicao atual pra fila de visitadas
+        visitados.add((x, y))           # Adiciona a posicao atual pra fila de visitadas
         if(x, y) != (inicio_x, inicio_y):
-            azul.goto(x, y)         # Move a tartaruga azul para a posicao
-            azul.stamp()            # Deixa uma copia da tartaruga no local
-    if(busca_profundidade(x - 24, y)):
+            azul.goto(x, y)             # Move a tartaruga azul para a posicao
+            azul.stamp()                # Deixa uma copia da tartaruga no local
+    if(busca_profundidade(x - 24, y)):  # Vai expandindo os nodos na ordem < v > ^ (chega ao final de uma ramificacao para comecar a explorar outra)
         solucao[(x - 24, y)] = x, y
         return 1
     elif(busca_profundidade(x, y - 24)):
@@ -243,9 +243,9 @@ def busca_profundidade(x, y):
     elif(busca_profundidade(x, y + 24)):
         solucao[(x, y + 24)] = x, y
         return 1
-    else:                       # Se nenhum nodo retornar 1: chegamos a um beco sem saida
+    else:                               # Se nenhum nodo retornar 1: chegamos a um beco sem saida
         time.sleep(tempo_de_espera)
-        vermelho.goto(x, y)     # Marca o caminho ate o beco sem saidas em vermelho
+        vermelho.goto(x, y)             # Marca o caminho ate o beco sem saidas em vermelho
         vermelho.stamp()
     return 0
 
@@ -259,8 +259,8 @@ def caminho_reverso(x, y):
             vermelho.goto(solucao[x, y])     # Coloca a tartaruga vermelha no nodo que chegar ao atual
             vermelho.stamp()                 # Deixa uma copia da tartaruga
         if metodo_busca == 2:
-            azul.goto(solucao[x, y])     # Coloca a tartaruga vermelha no nodo que chegar ao atual
-            azul.stamp()                 # Deixa uma copia da tartaruga
+            azul.goto(solucao[x, y])         # Coloca a tartaruga vermelha no nodo que chegar ao atual
+            azul.stamp()                     # Deixa uma copia da tartaruga
         x, y = solucao[x, y]                 # O nodo que gerou o atual se torna o novo atual
         if (x, y) == (inicio_x, inicio_y):   # Se o nodo for o inicio, deixa ele amarelo denovo
             amarelo.goto(x, y)
