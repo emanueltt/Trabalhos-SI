@@ -20,20 +20,19 @@ mostrar_caminhos = 1                    # Mostrar todos os nodos explorados junt
                                         # Para a busca em profundidade: Os nodos azuis representam o caminho ate a saida
                                         #                               Os nodos vermelhos representam os caminhos que chegaram a um beco sem saida
                                         #
-metodo_busca = 4                        # Metodo de busca escolhido:
+metodo_busca = 1                        # Metodo de busca escolhido:
                                         # 1 = Busca em largura
                                         #     A ordem de ramificacao e < v ^ >
                                         # 2 = Busca em profundidade
                                         #     A ordem da busca em profundidade e a seguinte: < v > ^
-                                        # 3 - Busca A* - em construcao (?)
                                         #
-                                        # 4 - Mostra todos os modos em ordem (1 - 3) com um tempo de espera de 5 segundos entre cada um
+                                        # 4 - Mostra todos os modos em ordem (1 - 2) com um tempo de espera de 5 segundos entre cada um
                                         #
 tempo_de_espera = 0                     # Se quiser que a animacao demore um pouco para acontecer, basta colocar um valor em segundos na variavel ao lado
                                         # Se quiser que n tenha intervalo, basta deixar em 0
                                         # Uma velocidade que achamos confortavel para entender o rumo que os metodos estao tomando e 0.1
                                         #
-mapa_desejado = 4                       # Abaixo das configuracoes de tela existem alguns mapas prontos (1 - 4)
+mapa_desejado = 1                       # Abaixo das configuracoes de tela existem alguns mapas prontos (1 - 4)
                                         # (A gente esqueceu que tinha que ser até 10x10, mas o cod aceita qualquer tamanho kk)
                                         # O mapa 0 e o do exemplo dado
                                         # O mapa 1 e um com varias ramificacoes 
